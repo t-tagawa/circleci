@@ -9,8 +9,13 @@ jobs:
       - image: circleci/python:3.6.1
     steps:
       - checkout
+#      - run:
+#        name: install the AWS CLO
+#        command: |
+#          echo "aaa"
+#          echo "bbb"
       - run:
-        name: install the AWS CLO
-        command: |
+          name: install dependencies
+          command: |
           echo "aaa"
           echo "bbb"
