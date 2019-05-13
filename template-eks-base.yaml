@@ -175,7 +175,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
         - "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
       Path: "/"
-
+      
 Outputs:
   SubnetIds:
     Description: All subnets in the VPC
