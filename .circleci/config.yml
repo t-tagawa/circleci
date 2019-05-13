@@ -12,5 +12,6 @@ jobs:
       - run:
           name: install the AWS CLI
           command: |
-            sudo pip3 install awscli --upgrade --user
-            sudo aws --version
+            sudo pip install --upgrade pip
+            sudo pip install awscli --upgrade --user
+            aws --version
