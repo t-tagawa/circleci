@@ -17,4 +17,4 @@ jobs:
       - run:
           name: install the AWS CLI
           command: |
-            echo ${BASE_STACK_NAME}
+            echo $BASE_STACK_NAME
