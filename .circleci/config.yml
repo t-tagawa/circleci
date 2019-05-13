@@ -9,17 +9,4 @@ jobs:
       - image: circleci/python:3.6.1
     steps:
       - checkout
-      - run: echo "A first hello"
-      - run: sleep 5
-  two:
-    docker:
-      - image: circleci/python:3.6.1
-    steps:
-      - checkout
-      - run: echo "A second hello"
-workflows:
-  version: 2
-  one_and_two:
-    jobs:
-      - one
-      - two
+      - run: aws cloudformation
