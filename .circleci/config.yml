@@ -17,5 +17,5 @@ jobs:
       - run:
           name: install dependencies
           command: |
-          echo "aaa"
-          echo "bbb"
+            echo "aaa"
+            echo "bbb"
