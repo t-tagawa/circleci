@@ -33,4 +33,4 @@ jobs:
       - run:
           name: create vpc
           command: |
-            aws cloudformation create-stack --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
+            aws cloudformation create-stack --region --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
