@@ -9,13 +9,8 @@ jobs:
       - image: circleci/python:3.6.1
     steps:
       - checkout
-#      - run:
-#        name: install the AWS CLO
-#        command: |
-#          echo "aaa"
-#          echo "bbb"
-      - run:
-          name: install dependencies
+        - run:
+          name: install the AWS CLI
           command: |
-            echo "aaa"
-            echo "bbb"
+            sudo pip3 install awscli --upgrade --user
+            sudo aws --version
