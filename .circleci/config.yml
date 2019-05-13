@@ -4,9 +4,8 @@
 #
 version: 2
 jobs:
-  one:
-    docker:
-      - image: circleci/python:3.6.1
-    steps:
-      - checkout
-      - run: aws cloudformation
+  docker:
+    - image: circleci/python:3.6.1
+  steps:
+    - checkout
+    - run: aws cloudformation
