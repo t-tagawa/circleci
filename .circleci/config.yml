@@ -12,5 +12,5 @@ jobs:
       - run:
         name: install the AWS CLO
         command: |
-          sudo pip3 install awscli --upgrade --user
-          aws --version
+          echo "aaa"
+          echo "bbb"
