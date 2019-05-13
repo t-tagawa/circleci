@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
         - run:
-          name: install the AWS CLI
-          command: |
-            sudo pip3 install awscli --upgrade --user
-            sudo aws --version
+            name: install the AWS CLI
+            command: |
+              sudo pip3 install awscli --upgrade --user
+              sudo aws --version
