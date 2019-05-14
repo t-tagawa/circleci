@@ -12,6 +12,8 @@ jobs:
       - AWS_CF_STACK_NAME: ci-test
       - SSH_USER: ec2-user
       - BASE_STACK_NAME: eks-dev-base
+      - K8S_CLUSTER_NAME: eks-dev-Cluster
+      - export K8S_VERSION: "1.11"
 
     steps:
       - checkout
@@ -30,8 +32,23 @@ jobs:
           command: |
             curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/aws-iam-authenticator
             chmod +x aws-iam-authenticator
+#      - run:
+#          name: create vpc
+#          command: |
+#            aws cloudformation create-stack --region ap-northeast-1 --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
+#            # スタックの完了を待つ
+#            aws cloudformation wait stack-create-complete --stack-name ${BASE_STACK_NAME}
       - run:
-          name: create vpc
+          name: get vps paramater
           command: |
-            aws cloudformation create-stack --region ap-northeast-1 --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
+            export CONTROLLPLANE_SECURITYGROUP_IDS=$(\aws cloudformation describe-stacks --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SecurityGroups")' | jq -r '.OutputValue')
+            export VPC_ID=$(aws cloudformation describe-stacks --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
+            export SUBNET_IDS=$(aws cloudformation describe-stacks --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
+            export CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
+      - run:
+          name: create eks(control plane)
+          command: |
+            eks create-cluster --kubernetes-version ${K8S_VERSION} \--name ${K8S_CLUSTER_NAME} --role-arn ${CLUSTER_ROLE_ARN} --resources-vpc-config subnetIds=${SUBNET_IDS},securityGroupIds=${CONTROLLPLANE_SECURITYGROUP_IDS}
+            # クラスターステータスがACTIVEになるのを待つ
+            aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --query cluster.status
             
