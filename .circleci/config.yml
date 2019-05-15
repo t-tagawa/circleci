@@ -68,9 +68,17 @@ jobs:
             done
             
             #create Worker Nodes
-            aws cloudformation create-stack  --region ${REGION} --stack-name ${NODEGROUP_STACK_NAME} --template-body=file://template-eks-nodegroup.yaml \
-            --parameters KeyName=${KEY_NAME},NodeImageId=${NODE_IMAGE_ID},Subnets=${SUBNET_IDS},NodeVolumeSize=${NODE_VOLUME_SIZE},\
-            NodeGroupName=${NODE_GROUP_NAME},ClusterControlPlaneSecurityGroup=${CONTROLLPLANE_SECURITYGROUP_IDS},VpcId=${VPC_ID},ClusterName=${K8S_CLUSTER_NAME} \
+            aws cloudformation create-stack  --region ${REGION} --stack-name ${NODEGROUP_STACK_NAME} \
+            --template-body=file://template-eks-nodegroup.yaml \
+            --parameters \
+            ParameterKey=KeyName,ParameterValue=${KEY_NAME} \
+            ParameterKey=NodeImageId,ParameterValue=${NODE_IMAGE_ID} \
+            ParameterKey=Subnets,ParameterValue=${SUBNET_IDS} \
+            ParameterKey=NodeVolumeSize,ParameterValue=${NODE_VOLUME_SIZE} \
+            ParameterKey=NodeGroupName,ParameterValue=${NODE_GROUP_NAME} \
+            ParameterKey=ClusterControlPlaneSecurityGroup,ParameterValue=${CONTROLLPLANE_SECURITYGROUP_IDS} \
+            ParameterKey=VpcId,ParameterValue=${VPC_ID} \
+            ParameterKey=ClusterName,ParameterValue=${K8S_CLUSTER_NAME} \
             --capabilities CAPABILITY_IAM
            
             aws cloudformation wait stack-create-complete --stack-name ${NODEGROUP_STACK_NAME}
