@@ -69,16 +69,16 @@ jobs:
             
             #create Worker Nodes
             echo "[">>tmp.json
-            echo "{ParameterKey:KeyName,ParameterValue:${KEY_NAME}}" >>tmp.json
-            echo "{ParameterKey:NodeImageId,ParameterValue:${NODE_IMAGE_ID}}" >>tmp.json
-            echo "{ParameterKey:Subnets,ParameterValue:${SUBNET_IDS}}" >>tmp.json
-            echo "{ParameterKey:NodeVolumeSize,ParameterValue:${NODE_VOLUME_SIZE}}" >>tmp.json
-            echo "{ParameterKey:NodeGroupName,ParameterValue:${NODE_GROUP_NAME}}" >>tmp.json
-            echo "{ParameterKey:ClusterControlPlaneSecurityGroup,ParameterValue=:${CONTROLLPLANE_SECURITYGROUP_IDS}}" >>tmp.json
-            echo "{ParameterKey:VpcId,ParameterValue:${VPC_ID}}" >>tmp.json
-            echo "{ParameterKey:ClusterName,ParameterValue:${K8S_CLUSTER_NAME}}" >>tmp.json
+            echo "{\"ParameterKey\":\"KeyName,ParameterValue\":\"${KEY_NAME}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"NodeImageId,ParameterValue\":\"${NODE_IMAGE_ID}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"Subnets,ParameterValue\":\"${SUBNET_IDS}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"NodeVolumeSize,ParameterValue\":\"${NODE_VOLUME_SIZE}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"NodeGroupName,ParameterValue\":\"${NODE_GROUP_NAME}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"ClusterControlPlaneSecurityGroup,ParameterValue=\":\"${CONTROLLPLANE_SECURITYGROUP_IDS}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"VpcId,ParameterValue\":\"${VPC_ID}\"}" >>tmp.json
+            echo "{\"ParameterKey\":\"ClusterName,ParameterValue\":\"${K8S_CLUSTER_NAME}\"}" >>tmp.json
             echo "]">>tmp.json
-            #cat tmp.json
+            cat tmp.json
             aws cloudformation create-stack  --region ${REGION} --stack-name ${NODEGROUP_STACK_NAME} \
             --template-body=file://template-eks-nodegroup.yaml \
             --parameters=file://tmp.json \
