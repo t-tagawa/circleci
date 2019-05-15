@@ -67,21 +67,11 @@ jobs:
       - run:
           name: create Worker Nodes
           command: |
-            jo -a \
-            $(jo ParameterKey=KeyName ParameterValue=${KEY_NAME}) \
-            $(jo ParameterKey=NodeImageId ParameterValue=${NODE_IMAGE_ID}) \
-            $(jo ParameterKey=Subnets ParameterValue=${SUBNET_IDS}) \
-            $(jo ParameterKey=NodeVolumeSize -s ParameterValue=${NODE_VOLUME_SIZE}) \
-            $(jo ParameterKey=NodeGroupName ParameterValue=${NODE_GROUP_NAME}) \
-            $(jo ParameterKey=ClusterControlPlaneSecurityGroup ParameterValue=${CONTROLLPLANE_SECURITYGROUP_IDS}) \
-            $(jo ParameterKey=VpcId ParameterValue=${VPC_ID}) \
-            $(jo ParameterKey=ClusterName ParameterValue=${K8S_CLUSTER_NAME}) \
-            > parameter-eks-nodegroup.json
-           
             aws cloudformation create-stack \
             --stack-name ${NODEGROUP_STACK_NAME} \
             --template-body=file://template-eks-nodegroup.yaml \
-            --parameters=file://parameter-eks-nodegroup.json  \
+            --parameters ParameterKey=${KEY_NAME},ParameterKey=${NODE_IMAGE_ID},ParameterKey=${SUBNET_IDS},ParameterKey=${NODE_VOLUME_SIZE},\
+            ParameterKey=${NODE_GROUP_NAME},ParameterKey=${CONTROLLPLANE_SECURITYGROUP_IDS},ParameterKey=${VPC_ID},ParameterKey=${K8S_CLUSTER_NAME},
             --capabilities CAPABILITY_IAM
            
             aws cloudformation wait stack-create-complete \
