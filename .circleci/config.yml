@@ -15,6 +15,11 @@ jobs:
       - K8S_CLUSTER_NAME: eks-dev-Cluster
       - K8S_VERSION: "1.11"
       - REGION: ap-northeast-1
+      - NODEGROUP_STACK_NAME: eks-dev-nodegroup-000
+      - KEY_NAME: circleci_test
+      - NODE_IMAGE_ID: ami-06f4af3742fca5998
+      - NODE_VOLUME_SIZE: '20'
+      - NODE_GROUP_NAME: eks-nodegroup-001
 
     steps:
       - checkout
@@ -42,11 +47,51 @@ jobs:
       - run:
           name: create eks(control plane)
           command: |
-            CONTROLLPLANE_SECURITYGROUP_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SecurityGroups")' | jq -r '.OutputValue')
-            VPC_ID=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
-            SUBNET_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
-            CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
-            #crete eks
-            aws eks create-cluster --region ${REGION} --kubernetes-version ${K8S_VERSION} --name ${K8S_CLUSTER_NAME} --role-arn ${CLUSTER_ROLE_ARN} --resources-vpc-config subnetIds=${SUBNET_IDS},securityGroupIds=${CONTROLLPLANE_SECURITYGROUP_IDS}
-            # クラスターステータスがACTIVEになるのを待つ
-            aws eks describe-cluster --region ${REGION} --name ${K8S_CLUSTER_NAME} --query cluster.status
+#            CONTROLLPLANE_SECURITYGROUP_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+#            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SecurityGroups")' | jq -r '.OutputValue')
+#            VPC_ID=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+#            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
+#            SUBNET_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+#            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
+#            CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+#            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
+#            #crete eks
+#            aws eks create-cluster --region ${REGION} --kubernetes-version ${K8S_VERSION} --name ${K8S_CLUSTER_NAME} --role-arn ${CLUSTER_ROLE_ARN} \
+#            --resources-vpc-config subnetIds=${SUBNET_IDS},securityGroupIds=${CONTROLLPLANE_SECURITYGROUP_IDS}
+#            # クラスターステータスがACTIVEになるのを待つ
+            CK_EKS_STATUS=$(aws eks describe-cluster --region ${REGION} --name ${K8S_CLUSTER_NAME} --query cluster.status)
+            while [ $CK_EKS_STATUS = "CREATING" ]
+            do
+              sleep 300
+            done
+      - run:
+          name: create Worker Nodes
+          command: |
+            jo -a \
+            $(jo ParameterKey=KeyName ParameterValue=${KEY_NAME}) \
+            $(jo ParameterKey=NodeImageId ParameterValue=${NODE_IMAGE_ID}) \
+            $(jo ParameterKey=Subnets ParameterValue=${SUBNET_IDS}) \
+            $(jo ParameterKey=NodeVolumeSize -s ParameterValue=${NODE_VOLUME_SIZE}) \
+            $(jo ParameterKey=NodeGroupName ParameterValue=${NODE_GROUP_NAME}) \
+            $(jo ParameterKey=ClusterControlPlaneSecurityGroup ParameterValue=${CONTROLLPLANE_SECURITYGROUP_IDS}) \
+            $(jo ParameterKey=VpcId ParameterValue=${VPC_ID}) \
+            $(jo ParameterKey=ClusterName ParameterValue=${K8S_CLUSTER_NAME}) \
+            > parameter-eks-nodegroup.json
+           
+            aws cloudformation create-stack \
+            --stack-name ${NODEGROUP_STACK_NAME} \
+            --template-body=file://template-eks-nodegroup.yaml \
+            --parameters=file://parameter-eks-nodegroup.json  \
+            --capabilities CAPABILITY_IAM
+           
+            aws cloudformation wait stack-create-complete \
+            --stack-name ${NODEGROUP_STACK_NAME}
+           
+            export K8S_NODE_INSTANCE_ROLE=$( \
+            aws cloudformation describe-stacks \
+            --stack-name ${NODEGROUP_STACK_NAME} | \
+            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "NodeInstanceRole")' | \
+            jq -r '.OutputValue')
+           
+            echo "NodeInstanceRole"
+            echo ${K8S_NODE_INSTANCE_ROLE}
