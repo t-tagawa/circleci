@@ -79,10 +79,10 @@ jobs:
             echo "{ParameterKey:ClusterName,ParameterValue:${K8S_CLUSTER_NAME}}" >>tmp.json
             echo "]">>tmp.json
             #cat tmp.json
-            #aws cloudformation create-stack  --region ${REGION} --stack-name ${NODEGROUP_STACK_NAME} \
-            #--template-body=file://template-eks-nodegroup.yaml \
-            #--parameters=file://tmp.json \
-            #--capabilities CAPABILITY_IAM
+            aws cloudformation create-stack  --region ${REGION} --stack-name ${NODEGROUP_STACK_NAME} \
+            --template-body=file://template-eks-nodegroup.yaml \
+            --parameters=file://tmp.json \
+            --capabilities CAPABILITY_IAM
            
             #aws cloudformation wait stack-create-complete --stack-name ${NODEGROUP_STACK_NAME}
            
