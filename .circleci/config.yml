@@ -47,14 +47,14 @@ jobs:
       - run:
           name: create eks(control plane)
           command: |
-            #CONTROLLPLANE_SECURITYGROUP_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
-            #jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SecurityGroups")' | jq -r '.OutputValue')
-            #VPC_ID=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
-            #jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
-            #SUBNET_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
-            #jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
-            #CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
-            #jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
+            CONTROLLPLANE_SECURITYGROUP_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SecurityGroups")' | jq -r '.OutputValue')
+            VPC_ID=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
+            SUBNET_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
+            CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |\
+            jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
             ##crete eks
             #aws eks create-cluster --region ${REGION} --kubernetes-version ${K8S_VERSION} --name ${K8S_CLUSTER_NAME} --role-arn ${CLUSTER_ROLE_ARN} \
             #--resources-vpc-config subnetIds=${SUBNET_IDS},securityGroupIds=${CONTROLLPLANE_SECURITYGROUP_IDS}
@@ -71,7 +71,7 @@ jobs:
             --stack-name ${NODEGROUP_STACK_NAME} \
             --template-body=file://template-eks-nodegroup.yaml \
             --parameters KeyName=${KEY_NAME},NodeImageId=${NODE_IMAGE_ID},Subnets=${SUBNET_IDS},NodeVolumeSize -s=${NODE_VOLUME_SIZE},\
-            NodeGroupName=${NODE_GROUP_NAME},ClusterControlPlaneSecurityGroup=${CONTROLLPLANE_SECURITYGROUP_IDS},VpcId=${VPC_ID},ClusterName=${K8S_CLUSTER_NAME}
+            NodeGroupName=${NODE_GROUP_NAME},ClusterControlPlaneSecurityGroup=${CONTROLLPLANE_SECURITYGROUP_IDS},VpcId=${VPC_ID},ClusterName=${K8S_CLUSTER_NAME}\
             --capabilities CAPABILITY_IAM
            
             #aws cloudformation wait stack-create-complete \
