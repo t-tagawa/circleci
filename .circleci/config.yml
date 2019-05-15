@@ -33,12 +33,12 @@ jobs:
           command: |
             curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/aws-iam-authenticator
             chmod +x aws-iam-authenticator
-#      - run:
-#          name: create vpc
-#          command: |
-#            aws cloudformation create-stack --region ${REGION} --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
-#            # スタックの完了を待つ
-#            aws cloudformation wait stack-create-complete --stack-name ${BASE_STACK_NAME}
+      - run:
+          name: create vpc
+          command: |
+            aws cloudformation create-stack --region ${REGION} --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
+            # スタックの完了を待つ
+            aws cloudformation wait stack-create-complete --stack-name ${BASE_STACK_NAME}
       - run:
           name: create eks(control plane)
           command: |
@@ -46,6 +46,7 @@ jobs:
             VPC_ID=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "VpcId")' | jq -r '.OutputValue')
             SUBNET_IDS=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "SubnetIds")' | jq -r '.OutputValue')
             CLUSTER_ROLE_ARN=$(aws cloudformation describe-stacks --region ${REGION} --stack-name ${BASE_STACK_NAME} |jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ClusterRoleArn")' | jq -r '.OutputValue')
+            #crete eks
             aws eks create-cluster --region ${REGION} --kubernetes-version ${K8S_VERSION} --name ${K8S_CLUSTER_NAME} --role-arn ${CLUSTER_ROLE_ARN} --resources-vpc-config subnetIds=${SUBNET_IDS},securityGroupIds=${CONTROLLPLANE_SECURITYGROUP_IDS}
             # クラスターステータスがACTIVEになるのを待つ
             aws eks describe-cluster --region ${REGION} --name ${K8S_CLUSTER_NAME} --query cluster.status
