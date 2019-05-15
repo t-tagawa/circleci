@@ -71,7 +71,7 @@ jobs:
             aws cloudformation create-stack \
             --stack-name ${NODEGROUP_STACK_NAME} \
             --template-body=file://template-eks-nodegroup.yaml \
-            --parameters KeyName=${KEY_NAME},NodeImageId=${NODE_IMAGE_ID},Subnets=${SUBNET_IDS},NodeVolumeSize -s=${NODE_VOLUME_SIZE},\
+            --parameters KeyName=${KEY_NAME},NodeImageId=${NODE_IMAGE_ID},Subnets=${SUBNET_IDS},NodeVolumeSize=${NODE_VOLUME_SIZE},\
             NodeGroupName=${NODE_GROUP_NAME},ClusterControlPlaneSecurityGroup=${CONTROLLPLANE_SECURITYGROUP_IDS},VpcId=${VPC_ID},ClusterName=${K8S_CLUSTER_NAME}\
             --capabilities CAPABILITY_IAM
            
