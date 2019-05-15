@@ -38,7 +38,7 @@ jobs:
           command: |
             aws cloudformation create-stack --region ${REGION} --stack-name ${BASE_STACK_NAME} --template-body=file://template-eks-base.yaml --capabilities CAPABILITY_NAMED_IAM
             # スタックの完了を待つ
-            aws cloudformation wait stack-create-complete --stack-name ${BASE_STACK_NAME}
+            aws cloudformation wait --region ${REGION} stack-create-complete --stack-name ${BASE_STACK_NAME}
       - run:
           name: create eks(control plane)
           command: |
